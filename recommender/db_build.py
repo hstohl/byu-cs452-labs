@@ -40,7 +40,6 @@ cursor.execute(CREATE_PODCAST_TABLE)
 cursor.execute(CREATE_SEGMENT_TABLE)
 
 conn.commit()
-cursor.close()
 conn.close()
 # TODO: Create tables with psycopg2 (example: https://www.geeksforgeeks.org/executing-sql-query-with-psycopg2-in-python/)
 
