@@ -27,7 +27,8 @@ CREATE_SEGMENT_TABLE = """
         end_time FLOAT NOT NULL,
         content TEXT NOT NULL,
         embedding VECTOR(1536) NOT NULL,
-        podcast_id INT FOREIGN KEY REFERENCES podcast(id)
+        podcast_id INT,
+        FOREIGN KEY (podcast_id) REFERENCES podcast(id)
     );
 
 """
