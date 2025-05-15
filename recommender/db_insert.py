@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from datasets import load_dataset
 import pandas as pd
 
-from recommender.utils import fast_pg_insert
+from utils import fast_pg_insert
 
 load_dotenv()
 
@@ -16,6 +16,7 @@ CONNECTION = os.getenv("DATABASE_URL")
 # TODO: Read documents files
 documents_dir = "documents"
 doc_segments = {}
+podcast_id_to_title = {}
 
 for filename in os.listdir(documents_dir):
     if filename.endswith(".jsonl"):
@@ -29,6 +30,7 @@ for filename in os.listdir(documents_dir):
                     metadata = obj["body"]["metadata"]
                     start_time = metadata["start_time"]
                     end_time = metadata["stop_time"]
+                    title = metadata["title"]
 
                     doc_segments[custom_id] = {
                         "podcast_id": podcast_id,
@@ -36,6 +38,10 @@ for filename in os.listdir(documents_dir):
                         "end_time": end_time,
                         "content": input_text
                     }
+
+                    if podcast_id not in podcast_id_to_title:
+                        podcast_id_to_title[podcast_id] = title
+
                 except Exception as e:
                     print(f"[DOC ERROR] {e}")
 
@@ -70,8 +76,8 @@ ds = load_dataset("Whispering-GPT/lex-fridman-podcast")
 
 # TODO: Insert into postgres
 podcast_df = pd.DataFrame([
-    {"id": podcast_id, "title": title}
-    for podcast_id, title in doc_segments.items()
+    {"id": pid, "title": title}
+    for pid, title in podcast_id_to_title.items()
 ])
 
 df_segments = pd.DataFrame(segment_rows)

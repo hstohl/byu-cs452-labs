@@ -10,7 +10,7 @@ CONNECTION = os.getenv("DATABASE_URL")
 # paste connection string here or read from .env file
 
 # need to run this to enable vector data type
-CREATE_EXTENSION = "CREATE EXTENSION vector"
+CREATE_EXTENSION = "CREATE EXTENSION IF NOT EXISTS vector;"
 
 # TODO: Add create table statement
 CREATE_PODCAST_TABLE = """
@@ -26,7 +26,7 @@ CREATE_SEGMENT_TABLE = """
         start_time FLOAT NOT NULL,
         end_time FLOAT NOT NULL,
         content TEXT NOT NULL,
-        embedding VECTOR(1536) NOT NULL,
+        embedding VECTOR(128) NOT NULL,
         podcast_id INT,
         FOREIGN KEY (podcast_id) REFERENCES podcast(id)
     );
