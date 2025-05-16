@@ -47,14 +47,113 @@ query_4 = """
     LIMIT 5;
 """
 
+query_5 = """
+    SELECT 
+    p.title AS podcast_title,
+    target.embedding <-> avg_embeddings.avg_embedding AS embedding_distance
+    FROM (
+        SELECT 
+            podcast_id, 
+            AVG(embedding) AS avg_embedding
+        FROM podcast_segment
+        GROUP BY podcast_id
+    ) AS avg_embeddings
+    JOIN podcast p ON p.id = avg_embeddings.podcast_id,
+        (SELECT embedding FROM podcast_segment WHERE id = '267:476') AS target
+    ORDER BY embedding_distance
+    LIMIT 5;
+"""
+
+query_6 = """ 
+    SELECT 
+    p.title AS podcast_title,
+    target.embedding <-> avg_embeddings.avg_embedding AS embedding_distance
+    FROM (
+        SELECT 
+            podcast_id, 
+            AVG(embedding) AS avg_embedding
+        FROM podcast_segment
+        GROUP BY podcast_id
+    ) AS avg_embeddings
+    JOIN podcast p ON p.id = avg_embeddings.podcast_id,
+        (SELECT embedding FROM podcast_segment WHERE id = '48:511') AS target
+    ORDER BY embedding_distance
+    LIMIT 5;
+"""
+
+query_7 = """
+    SELECT 
+    p.title AS podcast_title,
+    target.embedding <-> avg_embeddings.avg_embedding AS embedding_distance
+    FROM (
+        SELECT 
+            podcast_id, 
+            AVG(embedding) AS avg_embedding
+        FROM podcast_segment
+        GROUP BY podcast_id
+    ) AS avg_embeddings
+    JOIN podcast p ON p.id = avg_embeddings.podcast_id,
+        (SELECT embedding FROM podcast_segment WHERE id = '51:56') AS target
+    ORDER BY embedding_distance
+    LIMIT 5;
+"""
+
+query_8 = """
+    SELECT 
+        p.title AS podcast_title,
+        target.avg_embedding <-> avg_embeddings.avg_embedding AS embedding_distance
+    FROM (
+        SELECT 
+            podcast_id, 
+            AVG(embedding) AS avg_embedding
+        FROM podcast_segment
+        GROUP BY podcast_id
+    ) AS avg_embeddings
+    JOIN podcast p ON p.id = avg_embeddings.podcast_id,
+        (
+            SELECT AVG(embedding) AS avg_embedding
+            FROM podcast_segment
+            WHERE podcast_id = 205
+        ) AS target
+    WHERE avg_embeddings.podcast_id != 205
+    ORDER BY embedding_distance
+    LIMIT 5;
+"""
+
+queries = [query_1, query_2, query_3, query_4]
+
 conn = psycopg2.connect(CONNECTION)
 cursor = conn.cursor()
+i = 1
+# Execute the first four queries
+for query in queries:
+    print("Query ", i)
+    cursor.execute(query)
+    results = cursor.fetchall()
+    for row in results:
+        podcast_title, segment_id, content, start_time, end_time, distance = row
+        print(f"[{segment_id}] {podcast_title} | {start_time:.2f}–{end_time:.2f} | distance={distance:.4f}")
+        print(f"    {content[:100]}...\n")
+    i += 1
 
-cursor.execute(query_1)
-cursor.execute(query_2)
-cursor.execute(query_3)
-cursor.execute(query_4)
+# Execute the last three queries
+for query in [query_5, query_6, query_7]:
+    print("Query ", i)
+    cursor.execute(query)
+    results = cursor.fetchall()
+    for row in results:
+        podcast_title, distance = row
+        print(f"{podcast_title} | distance={distance:.4f}")
+    i += 1
 
-conn.commit()
+# Execute the last query
+print("Query ", i)
+cursor.execute(query_8)
+results = cursor.fetchall()
+for row in results:
+    podcast_title, distance = row
+    print(f"{podcast_title} | distance={distance:.4f}")
+
+cursor.close()
 conn.close()
 
