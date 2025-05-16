@@ -37,4 +37,24 @@ query_3 = """
     LIMIT 5;
 """
 
+query_4 = """
+    SELECT p.title, ps.id, ps.content, ps.start_time, ps.end_time, ps.embedding <-> target.embedding AS embedding_distance
+    FROM podcast_segment ps
+    JOIN podcast p ON ps.podcast_id = p.id,
+        (SELECT embedding FROM podcast_segment WHERE id = '51:56') AS target
+    WHERE ps.id != '51:56'
+    ORDER BY embedding_distance
+    LIMIT 5;
+"""
+
+conn = psycopg2.connect(CONNECTION)
+cursor = conn.cursor()
+
+cursor.execute(query_1)
+cursor.execute(query_2)
+cursor.execute(query_3)
+cursor.execute(query_4)
+
+conn.commit()
+conn.close()
 
